@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, select
 
 from backend.database import get_session, create_db_and_tables
-from backend import models
+from backend import models, schemas
 
 
 @asynccontextmanager
@@ -36,14 +36,15 @@ def login_page(request: Request, name: str):
     )
 
 
-@app.post("/users/", response_model=models.User)
-def create_user(user: models.User, session: Session = Depends(get_session)):
+@app.post("/users/", response_model=models.UserRead)
+def create_user(user_data: schemas.UserCreate, session: Session = Depends(get_session)):
+    user = models.User(**user_data.dict())
     session.add(user)
     session.commit()
     session.refresh(user)
     return user
 
-@app.get("/users/", response_model=List[models.User])
+@app.get("/users/", response_model=List[models.UserRead])
 def list_users(session: Session = Depends(get_session)):
     statement = select(models.User)
     users = session.exec(statement).all()
@@ -60,14 +61,15 @@ def list_subscriptions(user_id: int, session: Session = Depends(get_session)):
     return rooms
 
 
-@app.post("/rooms/", response_model=models.Room)
-def create_room(room: models.Room, session: Session = Depends(get_session)):
+@app.post("/rooms/", response_model=models.RoomRead)
+def create_room(room: schemas.RoomCreate, session: Session = Depends(get_session)):
+    room = models.Room(**room.dict())
     session.add(room)
     session.commit()
     session.refresh(room)
     return room
 
-@app.get("/rooms/", response_model=List[models.Room])
+@app.get("/rooms/", response_model=List[models.RoomRead])
 def list_rooms(session: Session = Depends(get_session)):
     statement = select(models.Room)
     rooms = session.exec(statement).all()
@@ -79,7 +81,7 @@ def list_messages(room_id: int, session: Session = Depends(get_session)):
     messages = session.exec(statement).all()
     return messages
 
-@app.get("/rooms/{room_id}/subscribers/", response_model=List[models.User])
+@app.get("/rooms/{room_id}/subscribers/", response_model=List[models.UserRead])
 def list_subscribers(room_id: int, session: Session = Depends(get_session)):
     statement = statement = (
         select(models.User)
@@ -90,15 +92,17 @@ def list_subscribers(room_id: int, session: Session = Depends(get_session)):
     return subscribers
 
 
-@app.post("/subscriptions/", response_model=models.Subscription)
-def create_subscription(subscription: models.Subscription, session: Session = Depends(get_session)):
+@app.post("/subscriptions/", response_model=models.SubscriptionRead)
+def create_subscription(subscription: schemas.SubscriptionCreate, session: Session = Depends(get_session)):
+    subscription = models.Subscription(**subscription.dict())
     session.add(subscription)
     session.commit()
     session.refresh(subscription)
     return subscription
 
-@app.post("/messages/", response_model=models.Message)
-def create_message(message: models.Message, session: Session = Depends(get_session)):
+@app.post("/messages/", response_model=models.MessageRead)
+def create_message(message: schemas.MessageCreate, session: Session = Depends(get_session)):
+    message = models.Message(**message.dict())
     session.add(message)
     session.commit()
     session.refresh(message)

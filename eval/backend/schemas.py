@@ -3,13 +3,11 @@ from sqlmodel import SQLModel
 
 class UserCreate(SQLModel):
     name: str
-    email: str | None = None
     is_active: bool = True
 
 class UserRead(SQLModel):
     id: int
     name: str
-    email: str | None = None
     is_active: bool
 
 
