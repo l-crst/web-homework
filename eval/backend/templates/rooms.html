@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rooms</title>
+</head>
+<body>
+    <h1>Bonjour {{ user.name }}</h1>
+
+    <h2>Rooms disponibles</h2>
+
+    <ul>
+        {% for room in rooms %}
+            <li>
+                <strong>{{ room.name }}</strong>
+
+                {% if room.id in subscribed_room_ids %}
+                    <form method="get" action="/{{user.id}}/room/{{room.id}}/" style="display:inline;">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <button type="submit">Entrer</button>
+                    </form>
+
+                    <form method="post" action="/subscriptions/delete/{{user.id}}/{{room.id}}" style="display:inline;">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="room_id" value="{{ room.id }}">
+                        <button type="submit">Se désabonner</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="/subscriptions/{{user.id}}/{{room.id}}/" style="display:inline;">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <button type="submit">S’abonner</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <form action="/" method="get">
+        <button type="submit">Changer d'utilisateur</button>
+    </form>
+
+</body>
+</html>

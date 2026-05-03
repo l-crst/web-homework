@@ -1,6 +1,20 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h1>Good morning {{ name }}!</h1>
-  </body>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion</title>
+</head>
+<body>
+    <h1>Choisis ton utilisateur</h1>
+
+    <form method="post" action="/select-user/">
+        <select name="user_id">
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Entrer</button>
+    </form>
+</body>
 </html>

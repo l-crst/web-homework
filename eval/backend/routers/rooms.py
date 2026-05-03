@@ -16,7 +16,7 @@ def find_room(session: Session, room_id: int):
 
 router = APIRouter()
 
-@router.post("/", response_model=models.RoomRead)
+@router.post("/", response_model=schemas.RoomRead)
 def create_room(room: schemas.RoomCreate, session: Session = Depends(get_session)):
     statement = select(models.Room).where(models.Room.name == room.name)
     existing_room = session.exec(statement).first()
@@ -36,7 +36,7 @@ def delete_room(room_id: int, session: Session = Depends(get_session)):
     session.commit()
     return {"message": "Room deleted"}
 
-@router.get("/", response_model=List[models.RoomRead])
+@router.get("/", response_model=List[schemas.RoomRead])
 def list_rooms(session: Session = Depends(get_session)):
     statement = select(models.Room)
     rooms = session.exec(statement).all()
@@ -48,7 +48,7 @@ def list_messages(room_id: int, session: Session = Depends(get_session)):
     messages = session.exec(statement).all()
     return messages
 
-@router.get("/{room_id}/subscribers/", response_model=List[models.UserRead])
+@router.get("/{room_id}/subscribers/", response_model=List[schemas.UserRead])
 def list_subscribers(room_id: int, session: Session = Depends(get_session)):
     statement = statement = (
         select(models.User)

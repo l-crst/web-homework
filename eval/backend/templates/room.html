@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ room.name }}</title>
+</head>
+<body>
+    <header>
+        <h1>Room : {{ room.name }}</h1>
+        <p>Connecté en tant que <strong>{{ user.name }}</strong></p>
+
+        <nav>
+            <a href="/rooms?user_id={{ user.id }}">Retour aux rooms</a>
+            |
+            <a href="/">Changer d'utilisateur</a>
+        </nav>
+    </header>
+
+    <hr>
+
+    <main>
+        <section>
+            <h2>Messages</h2>
+
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li>
+                            <strong>
+                                {% if message.user_id in user_by_id %}
+                                    {{ user_by_id[message.user_id].name }}
+                                {% else %}
+                                    Utilisateur inconnu
+                                {% endif %}
+                            </strong>
+                            :
+                            {{ message.content }}
+
+                            {% if message.created_at %}
+                                <small>({{ message.created_at }})</small>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Aucun message pour l'instant.</p>
+            {% endif %}
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>Envoyer un message</h2>
+
+            <form method="post" action="/rooms/{{ room.id }}/send-messages/">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <label for="content">Message</label>
+                <br>
+
+                <textarea
+                    id="content"
+                    name="content"
+                    rows="4"
+                    cols="50"
+                    required
+                ></textarea>
+
+                <br>
+
+                <button type="submit">Envoyer</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

@@ -18,7 +18,7 @@ def find_user(session: Session, user_id: int):
 router = APIRouter()
 
 
-@router.post("/", response_model=models.UserRead)
+@router.post("/", response_model=schemas.UserRead)
 def create_user(user_data: schemas.UserCreate, session: Session = Depends(get_session)):
     statement = select(models.User).where(models.User.name == user_data.name)
     existing_user = session.exec(statement).first()
@@ -38,7 +38,7 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
     session.commit()
     return {"message": "User deleted"}
 
-@router.get("/", response_model=List[models.UserRead])
+@router.get("/", response_model=List[schemas.UserRead])
 def list_users(session: Session = Depends(get_session)):
     statement = select(models.User)
     users = session.exec(statement).all()
