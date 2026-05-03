@@ -10,6 +10,7 @@ from sqlmodel import Session, select
 
 from backend.database import get_session, create_db_and_tables
 from backend import models, schemas
+from backend.routers import users, rooms, subscriptions, messages, websockets
 
 
 
@@ -107,5 +108,3 @@ def send_message(room_id:int, user_id:str = Form(...), content:str = Form(...), 
         url=f"/{user_id}/room/{room_id}/",
         status_code=303
     )
-
-

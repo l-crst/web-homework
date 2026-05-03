@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{{ room.name }}</title>
 </head>
+
 <body>
     <header>
         <h1>Room : {{ room.name }}</h1>
@@ -23,7 +24,7 @@
             <h2>Messages</h2>
 
             {% if messages %}
-                <ul>
+                <ul id="messages">
                     {% for message in messages %}
                         <li>
                             <strong>
@@ -52,9 +53,9 @@
         <section>
             <h2>Envoyer un message</h2>
 
-            <form method="post" action="/rooms/{{ room.id }}/send-messages/">
-                <input type="hidden" name="user_id" value="{{ user.id }}">
+            <form id="message-form">
                 <label for="content">Message</label>
+
                 <br>
 
                 <textarea
@@ -72,4 +73,101 @@
         </section>
     </main>
 </body>
+
+<script>
+    const roomId = {{ room.id }};
+    const userId = {{ user.id }};
+
+    console.log("roomId =", roomId);
+    console.log("userId =", userId);
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socketUrl = `${protocol}://${window.location.host}/ws/rooms/${roomId}?user_id=${userId}`;
+
+    console.log("socketUrl =", socketUrl);
+
+    const socket = new WebSocket(socketUrl);
+
+    const messagesList = document.getElementById("messages");
+    const messageForm = document.getElementById("message-form");
+    const messageContent = document.getElementById("content");
+
+    console.log("messagesList =", messagesList);
+    console.log("messageForm =", messageForm);
+    console.log("messageContent =", messageContent);
+
+    socket.onopen = function () {
+        console.log("WebSocket connecté");
+        console.log("readyState =", socket.readyState);
+    };
+
+    socket.onmessage = function (event) {
+        console.log("Message reçu depuis le serveur :", event.data);
+
+        const data = JSON.parse(event.data);
+
+        if (data.type === "error") {
+            alert(data.detail);
+            return;
+        }
+
+        if (data.type === "message") {
+            const li = document.createElement("li");
+
+            const strong = document.createElement("strong");
+            strong.textContent = data.username;
+
+            const text = document.createTextNode(` : ${data.content} `);
+
+            const small = document.createElement("small");
+            small.textContent = `(${data.created_at})`;
+
+            li.appendChild(strong);
+            li.appendChild(text);
+            li.appendChild(small);
+
+            messagesList.appendChild(li);
+        }
+    };
+
+    socket.onerror = function (event) {
+        console.error("Erreur WebSocket :", event);
+    };
+
+    socket.onclose = function (event) {
+        console.log("WebSocket déconnecté");
+        console.log("code =", event.code);
+        console.log("reason =", event.reason);
+    };
+
+    messageForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        console.log("Submit intercepté");
+
+        const content = messageContent.value.trim();
+
+        console.log("content =", content);
+        console.log("readyState au moment de l'envoi =", socket.readyState);
+
+        if (content === "") {
+            console.log("Message vide, pas d'envoi");
+            return;
+        }
+
+        if (socket.readyState !== WebSocket.OPEN) {
+            console.error("WebSocket pas ouvert, impossible d'envoyer");
+            return;
+        }
+
+        socket.send(JSON.stringify({
+            content: content
+        }));
+
+        console.log("Message envoyé au serveur");
+
+        messageContent.value = "";
+    });
+</script>
+
 </html>
